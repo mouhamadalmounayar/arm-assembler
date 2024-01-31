@@ -1,0 +1,2 @@
+ADDS R1 R2 R3 
+ SUBS R1 R2 #10
