@@ -13,4 +13,8 @@ public class LexicalAnalyzer {
     public void addToken(Token token) {
         this.tokens.add(token);
     }
+
+    public List<Token> getTokens() {
+        return tokens;
+    }
 }
