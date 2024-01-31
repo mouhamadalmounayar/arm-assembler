@@ -37,18 +37,18 @@ public class FirstPass {
             List<String> lines = this.getLinesFromFile();
             for (String line : lines) {
                 String[] words = line.split("\\s+");
-                for (String word : words) {
-                    if (MNEMONICS.contains(word)) {
-                        this.lexo.addToken(new Token(TokenType.MNEMONIC, word));
+                for (int i = 0 ; i<words.length; i++) {
+                    if (MNEMONICS.contains(words[i])) {
+                        this.lexo.addToken(new Token(TokenType.MNEMONIC, words[i]));
                     }
-                    if (REGISTERS.contains(word)) {
-                        this.lexo.addToken(new Token(TokenType.REGISTER, word));
+                    if (REGISTERS.contains(words[i])) {
+                        this.lexo.addToken(new Token(TokenType.REGISTER, words[i]));
                     }
-                    if (word.startsWith("#")) {
-                        this.lexo.addToken(new Token(TokenType.IMMEDIATE, word));
+                    if (words[i].startsWith("#")) {
+                        this.lexo.addToken(new Token(TokenType.IMMEDIATE, words[i]));
                     }
-                    if (word.equals("\n")) {
-                        this.lexo.addToken(new Token(TokenType.ENDOFLINE, word));
+                    if (i == words.length - 1) {
+                        this.lexo.addToken(new Token(TokenType.ENDOFLINE, words[i]));
                     }
                 }
             }
