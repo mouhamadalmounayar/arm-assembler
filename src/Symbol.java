@@ -13,6 +13,10 @@ public class Symbol {
         return this.name;
     }
 
+    @Override
+    public String toString(){
+        return this.name + ":" + this.address;
+    }
     public int getAddress() {
         return this.address;
     }

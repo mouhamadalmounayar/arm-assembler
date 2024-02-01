@@ -26,4 +26,9 @@ public class SymbolTable {
         return Optional.empty();
     }
 
+    @Override
+    public String toString(){
+        return this.symbolTable.toString();
+    }
+
 }

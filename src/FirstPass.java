@@ -5,6 +5,7 @@ import src.Parser.LabelNode;
 import src.Parser.Node;
 import src.Parser.OperandNode;
 
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,6 +36,7 @@ public class FirstPass {
         // Tokenization
         try {
             List<String> lines = this.getLinesFromFile();
+            int labelAddress = 0;
             for (String line : lines) {
                 String[] words = line.split("\\s+");
                 for (int i = 0 ; i<words.length; i++) {
@@ -50,14 +52,24 @@ public class FirstPass {
                     if (i == words.length - 1) {
                         this.lexo.addToken(new Token(TokenType.ENDOFLINE, words[i]));
                     }
+                    if ((i != words.length - 1 && words[i+1].equals(":"))){
+                        this.lexo.addToken(new Token(TokenType.LABEL, words[i]));
+                        this.symbolTable.addSymbol(new Symbol(labelAddress , words[i]));
+                        labelAddress+=4;
+                    }
+                    if ((i != 0 && words[i-1].equals(":"))){
+                        this.symbolTable.addSymbol(new Symbol(labelAddress , words[i]));
+                        labelAddress+=4;
+                    }
                 }
             }
             this.lexo.addToken(new Token(TokenType.ENDOFFILE, ""));
-
+            System.out.println(symbolTable.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
         Node tree = this.buildTree(this.organizeTokens(this.lexo.getTokens()));
+        System.out.println(tree);
         return tree.checkSyntax();
     }
 
@@ -82,15 +94,34 @@ public class FirstPass {
 
 
     public Node buildTree(List<List<Token>> lines) {
-        Node tree = new LabelNode(new Token(TokenType.LABEL, ""));
-        for (List<Token> line : lines) {
-            Node instruction = new InstructionNode(line.get(0));
-            for (int i = 1; i < line.size(); i++) {
-                instruction.addChild(new OperandNode(line.get(i)));
+        Node root = new LabelNode(new Token(TokenType.LABEL, "root"));
+        for(List<Token> line : lines){
+            if (isLabel(line)){
+                Node label = new LabelNode(line.get(0));
+                for (List<Token> innerLine : lines){
+                    if (isInstruction(innerLine)){
+                        buildTreeHelper(innerLine, label);
+                    }
+                }
+                root.addChild(label);
             }
-            tree.addChild(instruction);
         }
-        return tree;
+        return root;
+    }
+
+    public void buildTreeHelper(List<Token> line , Node tree){
+        Node instruction = new InstructionNode(line.get(0));
+        for (int i = 1; i<line.size() ; i++){
+            instruction.addChild(new OperandNode(line.get(i)));
+        }
+        tree.addChild(instruction);
+    }
+
+    public boolean isLabel (List<Token> line){
+        return !line.isEmpty() && line.get(0).getType().equals(TokenType.LABEL);
+    }
+    public boolean isInstruction(List<Token> line){
+        return !line.isEmpty() && line.get(0).getType().equals(TokenType.MNEMONIC);
     }
 
     public LexicalAnalyzer getLexo() {
