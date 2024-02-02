@@ -20,7 +20,7 @@ public class FirstPass {
     private SymbolTable symbolTable;
 
     private static final List<String> MNEMONICS = new ArrayList<>(Arrays.asList("LSLS", "LSRS", "ASRS", "ADDS", "SUBS", "MOVS", "CMP", "ANDS", "EORS", "ADCS", "SBCS", "RORS", "TST", "RSBS", "CMN", "ORRS", "MULS", "BICS", "MVNS", "STR", "LDR", "ADD", "SUB", "BEQ", "BNE", "BCS", "BCC", "BMI", "BPL", "BVS", "BVC", "BHI", "BLS", "BGE", "BLT", "BGT", "BLE", "BAL", "B"));
-    private static final List<String> REGISTERS = new ArrayList<>(Arrays.asList("R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7"));
+    private static final List<String> REGISTERS = new ArrayList<>(Arrays.asList("R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "sp"));
 
     public FirstPass(String filePath, LexicalAnalyzer lexo, SymbolTable symbolTable) {
         this.filePath = filePath;
@@ -38,8 +38,9 @@ public class FirstPass {
             List<String> lines = this.getLinesFromFile();
             int labelAddress = 0;
             for (String line : lines) {
-                String[] words = line.split("\\s+");
-                for (int i = 0 ; i<words.length; i++) {
+                String[] words = line.split("[\\[\\],\\s]+");
+                System.out.println(Arrays.toString(words));
+                for (int i = 0; i < words.length; i++) {
                     if (MNEMONICS.contains(words[i])) {
                         this.lexo.addToken(new Token(TokenType.MNEMONIC, words[i]));
                     }
@@ -50,20 +51,23 @@ public class FirstPass {
                         this.lexo.addToken(new Token(TokenType.IMMEDIATE, words[i]));
                     }
                     if (i == words.length - 1) {
-                        this.lexo.addToken(new Token(TokenType.ENDOFLINE, words[i]));
+                        this.lexo.addToken(new Token(TokenType.ENDOFLINE, "\n"));
                     }
-                    if ((i != words.length - 1 && words[i+1].equals(":"))){
+                    if ((i != words.length - 1 && words[i + 1].equals(":"))) {
                         this.lexo.addToken(new Token(TokenType.LABEL, words[i]));
-                        this.symbolTable.addSymbol(new Symbol(labelAddress , words[i]));
-                        labelAddress+=4;
+                        this.symbolTable.addSymbol(new Symbol(labelAddress, words[i]));
+                        labelAddress += 4;
                     }
-                    if ((i != 0 && words[i-1].equals(":"))){
-                        this.symbolTable.addSymbol(new Symbol(labelAddress , words[i]));
-                        labelAddress+=4;
+                    if ((i != 0 && words[i - 1].equals(":"))) {
+                        this.lexo.addToken(new Token(TokenType.VARIABLE, words[i]));
+                        this.symbolTable.addSymbol(new Symbol(labelAddress, words[i]));
+                        labelAddress += 4;
                     }
+
                 }
             }
             this.lexo.addToken(new Token(TokenType.ENDOFFILE, ""));
+            System.out.println(this.lexo.getTokens());
             System.out.println(symbolTable.toString());
         } catch (IOException e) {
             e.printStackTrace();
@@ -95,38 +99,58 @@ public class FirstPass {
 
     public Node buildTree(List<List<Token>> lines) {
         Node root = new LabelNode(new Token(TokenType.LABEL, "root"));
-        for(List<Token> line : lines){
-            if (isLabel(line)){
-                Node label = new LabelNode(line.get(0));
-                for (List<Token> innerLine : lines){
-                    if (isInstruction(innerLine)){
-                        buildTreeHelper(innerLine, label);
-                    }
-                }
+
+        for (List<Token> line : lines) {
+            if (isLabel(line)) {
+                Node label = new LabelNode(findLabel(line));
                 root.addChild(label);
+            } else {
+                Node instruction = new InstructionNode(line.get(0));
+
+                for (int i = 1; i < line.size(); i++) {
+                    instruction.addChild(new OperandNode(line.get(i)));
+                }
+
+                if (!root.getChildren().isEmpty()) {
+                    Node lastLabel = root.getChildren().get(root.getChildren().size() - 1);
+                    lastLabel.addChild(instruction);
+                } else {
+                    root.addChild(instruction);
+                }
             }
         }
         return root;
     }
 
-    public void buildTreeHelper(List<Token> line , Node tree){
+    public void buildTreeHelper(List<Token> line, Node tree) {
         Node instruction = new InstructionNode(line.get(0));
-        for (int i = 1; i<line.size() ; i++){
+        for (int i = 1; i < line.size(); i++) {
             instruction.addChild(new OperandNode(line.get(i)));
         }
         tree.addChild(instruction);
     }
 
-    public boolean isLabel (List<Token> line){
-        return !line.isEmpty() && line.get(0).getType().equals(TokenType.LABEL);
+    public boolean isLabel(List<Token> line) {
+        if (line.isEmpty()) return false;
+        for (Token token : line) {
+            if (token.getType().equals(TokenType.LABEL)) return true;
+        }
+        return false;
     }
-    public boolean isInstruction(List<Token> line){
+
+    public Token findLabel(List<Token> line) {
+        for (Token token : line) {
+            if (token.getType().equals(TokenType.LABEL)) return token;
+        }
+        return line.get(0);
+    }
+
+    public boolean isInstruction(List<Token> line) {
         return !line.isEmpty() && line.get(0).getType().equals(TokenType.MNEMONIC);
     }
 
     public LexicalAnalyzer getLexo() {
         return this.lexo;
     }
-
 
 }

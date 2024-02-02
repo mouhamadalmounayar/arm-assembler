@@ -19,6 +19,9 @@ public abstract class Node {
     public boolean isRegister() {
         return (this.node.getType().equals(TokenType.REGISTER));
     }
+    public boolean isStackPointer() {
+        return (this.node.getType().equals(TokenType.REGISTER) && this.node.getLexeme().equals("sp"));
+    }
 
     public Token getNode() {
         return this.node;
