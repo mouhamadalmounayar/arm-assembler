@@ -1,12 +1,5 @@
 start :
-ADDS R1 R2 #10
-SUBS R1 R2 #5
-STR R1 [sp , #8]
-loop :
-LSLS R1 R2 #10
-ifloop :
-ANDS R5 R6
-RSBS R2 R3 #0
-BEQ condition :
-ADDS R1 R2 #5
-LSLS R1 R2 #10
+SUBS R5 R7 R0
+ADDS R1 R3 R1
+end :
+LSLS R1 R3

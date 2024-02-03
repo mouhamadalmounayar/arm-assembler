@@ -54,13 +54,15 @@ public class FirstPass {
                         this.lexo.addToken(new Token(TokenType.ENDOFLINE, "\n"));
                     }
                     if ((i != words.length - 1 && words[i + 1].equals(":"))) {
-                        this.lexo.addToken(new Token(TokenType.LABEL, words[i]));
-                        this.symbolTable.addSymbol(new Symbol(labelAddress, words[i]));
+                        Token token = new Token(TokenType.LABEL, words[i]);
+                        this.lexo.addToken(token);
+                        this.symbolTable.addSymbol(new Symbol(labelAddress, token));
                         labelAddress += 4;
                     }
                     if ((i != 0 && words[i - 1].equals(":"))) {
-                        this.lexo.addToken(new Token(TokenType.VARIABLE, words[i]));
-                        this.symbolTable.addSymbol(new Symbol(labelAddress, words[i]));
+                        Token token = new Token(TokenType.VARIABLE, words[i]);
+                        this.lexo.addToken(token);
+                        this.symbolTable.addSymbol(new Symbol(labelAddress, token));
                         labelAddress += 4;
                     }
 
@@ -100,10 +102,14 @@ public class FirstPass {
     public Node buildTree(List<List<Token>> lines) {
         Node root = new LabelNode(new Token(TokenType.LABEL, "root"));
 
+        Node currentLabel = null;
+
+
         for (List<Token> line : lines) {
             if (isLabel(line)) {
-                Node label = new LabelNode(findLabel(line));
-                root.addChild(label);
+                Token labelToken = findLabelToken(line);
+                currentLabel = new LabelNode(labelToken);
+                root.addChild(currentLabel);
             } else {
                 Node instruction = new InstructionNode(line.get(0));
 
@@ -111,24 +117,22 @@ public class FirstPass {
                     instruction.addChild(new OperandNode(line.get(i)));
                 }
 
-                if (!root.getChildren().isEmpty()) {
-                    Node lastLabel = root.getChildren().get(root.getChildren().size() - 1);
-                    lastLabel.addChild(instruction);
+                if (currentLabel != null) {
+                    currentLabel.addChild(instruction);
                 } else {
                     root.addChild(instruction);
                 }
             }
         }
+
         return root;
     }
 
-    public void buildTreeHelper(List<Token> line, Node tree) {
-        Node instruction = new InstructionNode(line.get(0));
-        for (int i = 1; i < line.size(); i++) {
-            instruction.addChild(new OperandNode(line.get(i)));
-        }
-        tree.addChild(instruction);
+    private Token findLabelToken(List<Token> line) {
+        // Assuming the first token is always the label token
+        return line.get(0);
     }
+
 
     public boolean isLabel(List<Token> line) {
         if (line.isEmpty()) return false;

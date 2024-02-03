@@ -2,20 +2,20 @@ package src;
 
 public class Symbol {
     private int address;
-    private String name;
+    private Token token;
 
-    public Symbol(int address, String name) {
+    public Symbol(int address, Token token) {
         this.address = address;
-        this.name = name;
+        this.token = token;
     }
 
-    public String getName() {
-        return this.name;
+    public Token getName() {
+        return this.token;
     }
 
     @Override
     public String toString(){
-        return this.name + ":" + this.address;
+        return this.token.toString() + ":" + this.address;
     }
     public int getAddress() {
         return this.address;

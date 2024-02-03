@@ -37,7 +37,7 @@ public class InstructionNode extends Node {
         // register operations
         if (REGISTER_OPERATIONS.contains(mnemonic)) {
             if (this.children.size() == 3) {
-                return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister() && this.children.get(2).isImmediate() || this.children.get(2).isRegister());
+                return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister() && (this.children.get(2).isImmediate() || this.children.get(2).isRegister()));
             }
             if (this.children.size() == 2){
                 return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister());
@@ -55,7 +55,7 @@ public class InstructionNode extends Node {
         // arithmetic operations
         if (ARITHMETIC_OPERATIONS.contains(mnemonic)) {
             if (this.children.size() == 2 && mnemonic.equals("CMP")){
-                return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister());
+                return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isImmediate());
             }
             return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister() && this.children.size() == 2);
         }
@@ -83,7 +83,7 @@ public class InstructionNode extends Node {
         }
         // branch operations
         if (BRANCH_OPERATIONS.contains(mnemonic)){
-            return this.checkChildrenSyntax();
+            return this.checkChildrenSyntax() && this.children.isEmpty() ;
         }
 
         return false;

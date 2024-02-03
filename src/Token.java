@@ -20,7 +20,7 @@ public class Token {
 
     @Override
     public String toString() {
-        return this.lexeme;
+        return this.lexeme + "(" + this.type.toString()+ ")";
     }
 
     @Override
