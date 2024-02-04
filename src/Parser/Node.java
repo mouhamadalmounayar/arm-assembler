@@ -20,7 +20,7 @@ public abstract class Node {
         return (this.node.getType().equals(TokenType.REGISTER));
     }
     public boolean isStackPointer() {
-        return (this.node.getType().equals(TokenType.REGISTER) && this.node.getLexeme().equals("sp"));
+        return (this.node.getType().equals(TokenType.REGISTER) && this.node.getLexeme().equalsIgnoreCase("sp"));
     }
 
     public Token getNode() {

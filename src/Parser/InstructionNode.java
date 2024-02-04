@@ -54,7 +54,7 @@ public class InstructionNode extends Node {
         }
         // arithmetic operations
         if (ARITHMETIC_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))) {
-            if (this.children.size() == 2 && mnemonic.equals("CMP")){
+            if (this.children.size() == 2 && mnemonic.equalsIgnoreCase("CMP")){
                 return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister());
             }
             return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isImmediate() && this.children.size() == 2);
@@ -62,10 +62,10 @@ public class InstructionNode extends Node {
         // data processing operations
         if (DATA_PROCESSING_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))){
             if (this.children.size() == 3){
-                if (mnemonic.equals("RSBS")) {
+                if (mnemonic.equalsIgnoreCase("RSBS")) {
                     return this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister() &&  this.children.get(2).equals(new OperandNode(new Token(TokenType.IMMEDIATE, "#0")));
                 }
-                if (mnemonic.equals("MULS")){
+                if (mnemonic.equalsIgnoreCase("MULS")){
                     return this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister() && this.children.get(2).equals(this.children.get(0));
                 }
             }

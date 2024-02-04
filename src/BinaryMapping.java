@@ -24,7 +24,7 @@ public class BinaryMapping {
         map.add(new BinaryCodeSymbol("LSLS", "0100000010"));
         map.add(new BinaryCodeSymbol("LSRS", "0100000011"));
         map.add(new BinaryCodeSymbol("ASRS", "0100000100"));
-        map.add(new BinaryCodeSymbol("CMP", "010001010"));
+        map.add(new BinaryCodeSymbol("CMP", "0100001010"));
         map.add(new BinaryCodeSymbol("MOVS", "00100"));
         map.add(new BinaryCodeSymbol("ANDS", "0100000000"));
         map.add(new BinaryCodeSymbol("EORS", "0100000001"));

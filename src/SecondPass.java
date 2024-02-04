@@ -74,7 +74,7 @@ public class SecondPass {
             } else if (BRANCHES.stream().anyMatch(word -> word.equalsIgnoreCase(line.get(0).getLexeme()))) {
                 instructionCounter++;
                 appendInstruction(currentInstruction, line.get(0).getLexeme(), line, 8);
-            } else if (line.get(0).getLexeme().equals("B")) {
+            } else if (line.get(0).getLexeme().equalsIgnoreCase("B")) {
                 instructionCounter++;
                 appendInstruction(currentInstruction, line.get(0).getLexeme(), line, 11);
             } else {
