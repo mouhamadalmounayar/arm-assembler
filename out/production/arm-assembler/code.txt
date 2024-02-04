@@ -1,0 +1,20 @@
+loop :
+movs r0, #0
+movs r1, #1
+movs r2, #170
+movs r3, #255
+movs r4, #15
+rsbs r4, r4, #0
+asrs r4, r4, #1
+movs r5, #5
+adcs r5, r1
+sbcs r5, r1
+sbcs r5, r1
+movs r6, #170
+rors r6, r1
+tst r2, r6
+BMI loop
+
+
+
+
