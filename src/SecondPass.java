@@ -102,10 +102,10 @@ public class SecondPass {
             } else {
                 System.out.println("Unrecognized labels!");
             }
-        } else if (line.size() > 2 && line.get(2).type().equals(TokenType.REGISTER)) {
+        } else if (line.size() > 2 && line.get(2).type().equals(TokenType.REGISTER) && !mnemonic.equalsIgnoreCase("str") && !mnemonic.equalsIgnoreCase("ldr")) {
             for (int i = line.size() - 1; i >= 1; i--) {
                 if (line.get(i).type().equals(TokenType.IMMEDIATE) && !mnemonic.equalsIgnoreCase("RSBS")) {
-                    appendRestOfInstruction(line.get(i), bitsNumber, instruction);
+                    appendRestOfInstruction(line.get(i), bitsNumber, instruction, mnemonic);
                 } else {
                     instruction.append(this.mapping.findMnemonic(line.get(i).lexeme()));
                 }
@@ -113,7 +113,7 @@ public class SecondPass {
         } else {
             for (int i = 1; i < line.size(); i++) {
                 if (line.get(i).type().equals(TokenType.IMMEDIATE)) {
-                    appendRestOfInstruction(line.get(i), bitsNumber, instruction);
+                    appendRestOfInstruction(line.get(i), bitsNumber, instruction, mnemonic);
                 } else {
                     instruction.append(this.mapping.findMnemonic(line.get(i).lexeme()));
                 }
@@ -122,10 +122,16 @@ public class SecondPass {
 
     }
 
-    private void appendRestOfInstruction(Token token, int bitsNumber, StringBuilder instruction) {
-        String binary = Integer.toBinaryString(Integer.parseInt(token.lexeme().substring(1)));
+    private void appendRestOfInstruction(Token token, int bitsNumber, StringBuilder instruction, String mnemonic) {
+        String binary;
+        if (mnemonic.equalsIgnoreCase("str") || mnemonic.equalsIgnoreCase("ldr")) {
+            binary = Integer.toBinaryString(Integer.parseInt(token.lexeme().substring(1)) / 4);
+        } else {
+            binary = Integer.toBinaryString(Integer.parseInt(token.lexeme().substring(1)));
+        }
         String formattedBinary = String.format("%" + bitsNumber + "s", binary).replace(' ', '0');
         instruction.append(formattedBinary);
+
     }
 
     public StringBuilder convertToHexa(StringBuilder binary) {
