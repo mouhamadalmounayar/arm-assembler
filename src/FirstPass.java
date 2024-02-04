@@ -37,7 +37,6 @@ public class FirstPass {
     }
 
     public List<String> getLinesFromFile() throws IOException {
-        System.out.println(Files.readAllLines(Paths.get(this.filePath)).stream().map(String::trim).filter(line -> !line.isEmpty()).collect(Collectors.toList()));
         return Files.readAllLines(Paths.get(this.filePath)).stream().map(String::trim).filter(line -> !line.isEmpty()).collect(Collectors.toList());
     }
 
@@ -107,7 +106,6 @@ public class FirstPass {
 
     public Node buildTree(List<List<Token>> lines) {
         Node root = new LabelNode(new Token(TokenType.LABEL, "root"));
-        System.out.println(lines);
         Node currentLabel = null;
         for (List<Token> line : lines) {
             if (isLabel(line)) {
