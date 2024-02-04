@@ -35,16 +35,16 @@ public class InstructionNode extends Node {
         }
         String mnemonic = this.node.getLexeme();
         // register operations
-        if (REGISTER_OPERATIONS.contains(mnemonic)) {
+        if (REGISTER_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))) {
             if (this.children.size() == 3) {
-                return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister() && (this.children.get(2).isImmediate() || this.children.get(2).isRegister()));
+                return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister() && this.children.get(2).isImmediate() || this.children.get(2).isRegister());
             }
             if (this.children.size() == 2){
                 return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister());
             }
         }
         // arithmetic operation registers
-        if (BASIC_ARITHMETIC_OPERATIONS.contains(mnemonic)) {
+        if (BASIC_ARITHMETIC_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))) {
             if (this.children.size() == 3) {
                 return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister());
             }
@@ -53,14 +53,14 @@ public class InstructionNode extends Node {
             }
         }
         // arithmetic operations
-        if (ARITHMETIC_OPERATIONS.contains(mnemonic)) {
+        if (ARITHMETIC_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))) {
             if (this.children.size() == 2 && mnemonic.equals("CMP")){
-                return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isImmediate());
+                return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister());
             }
-            return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister() && this.children.size() == 2);
+            return (this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isImmediate() && this.children.size() == 2);
         }
         // data processing operations
-        if (DATA_PROCESSING_OPERATIONS.contains(mnemonic)){
+        if (DATA_PROCESSING_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))){
             if (this.children.size() == 3){
                 if (mnemonic.equals("RSBS")) {
                     return this.checkChildrenSyntax() && this.children.get(0).isRegister() && this.children.get(1).isRegister() &&  this.children.get(2).equals(new OperandNode(new Token(TokenType.IMMEDIATE, "#0")));
@@ -74,16 +74,16 @@ public class InstructionNode extends Node {
             }
         }
         // storage operations for stack pointers
-        if(STACK_POINTER_STORAGE.contains(mnemonic)){
+        if(STACK_POINTER_STORAGE.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))){
             return this.checkChildrenSyntax() && this.children.size() == 3 && this.children.get(0).isRegister() && this.children.get(1).isStackPointer() && this.children.get(2).isImmediate();
         }
         // offset operations for stack pointers
-        if (STACK_POINTER_OFFSET.contains(mnemonic)) {
+        if (STACK_POINTER_OFFSET.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))) {
             return this.checkChildrenSyntax() && this.children.size() == 2 && this.children.get(1).isStackPointer() && this.children.get(0).isImmediate();
         }
         // branch operations
-        if (BRANCH_OPERATIONS.contains(mnemonic)){
-            return this.checkChildrenSyntax() && this.children.isEmpty() ;
+        if (BRANCH_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))){
+            return this.checkChildrenSyntax() && this.children.get(0).getNode().getType().equals(TokenType.LABEL) ;
         }
 
         return false;

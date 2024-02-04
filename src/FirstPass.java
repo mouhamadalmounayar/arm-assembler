@@ -13,38 +13,49 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FirstPass {
     private final String filePath;
     private LexicalAnalyzer lexo;
     private SymbolTable symbolTable;
+    private int instructionCounter;
 
-    private static final List<String> MNEMONICS = new ArrayList<>(Arrays.asList("LSLS", "LSRS", "ASRS", "ADDS", "SUBS", "MOVS", "CMP", "ANDS", "EORS", "ADCS", "SBCS", "RORS", "TST", "RSBS", "CMN", "ORRS", "MULS", "BICS", "MVNS", "STR", "LDR", "ADD", "SUB", "BEQ", "BNE", "BCS", "BCC", "BMI", "BPL", "BVS", "BVC", "BHI", "BLS", "BGE", "BLT", "BGT", "BLE", "BAL", "B"));
+    private static final List<String> MNEMONICS = new ArrayList<>(Arrays.asList("LSLS", "LSRS", "ASRS", "ADDS", "SUBS", "MOVS", "CMP", "ANDS", "EORS", "ADCS", "SBCS", "RORS", "TST", "RSBS", "CMN", "ORRS", "MULS", "BICS", "MVNS", "STR", "LDR", "ADD", "SUB"));
     private static final List<String> REGISTERS = new ArrayList<>(Arrays.asList("R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "sp"));
+
+    private static final List<String> BRANCHES = new ArrayList<>(Arrays.asList("BEQ", "BNE", "BCS", "BCC", "BMI", "BPL", "BVS", "BVC", "BHI", "BLS", "BGE", "BLT", "BGT", "BLE", "BAL", "B"));
 
     public FirstPass(String filePath, LexicalAnalyzer lexo, SymbolTable symbolTable) {
         this.filePath = filePath;
         this.lexo = lexo;
         this.symbolTable = symbolTable;
+        this.instructionCounter = -1;
+    }
+
+    public SymbolTable getSymbolTable(){
+        return this.symbolTable;
     }
 
     public List<String> getLinesFromFile() throws IOException {
-        return Files.readAllLines(Paths.get(this.filePath));
+        return Files.readAllLines(Paths.get(this.filePath)).stream().filter(line -> !line.isEmpty()).collect(Collectors.toList());
     }
 
     public boolean execute() {
         // Tokenization
         try {
             List<String> lines = this.getLinesFromFile();
-            int labelAddress = 0;
             for (String line : lines) {
                 String[] words = line.split("[\\[\\],\\s]+");
                 System.out.println(Arrays.toString(words));
                 for (int i = 0; i < words.length; i++) {
-                    if (MNEMONICS.contains(words[i])) {
+                    int finalI = i;
+                    if (MNEMONICS.stream().anyMatch(mnemonic -> mnemonic.equalsIgnoreCase(words[finalI]))) {
+                        this.instructionCounter++;
                         this.lexo.addToken(new Token(TokenType.MNEMONIC, words[i]));
                     }
-                    if (REGISTERS.contains(words[i])) {
+
+                    if (REGISTERS.stream().anyMatch(register -> register.equalsIgnoreCase(words[finalI]))) {
                         this.lexo.addToken(new Token(TokenType.REGISTER, words[i]));
                     }
                     if (words[i].startsWith("#")) {
@@ -55,15 +66,14 @@ public class FirstPass {
                     }
                     if ((i != words.length - 1 && words[i + 1].equals(":"))) {
                         Token token = new Token(TokenType.LABEL, words[i]);
+
                         this.lexo.addToken(token);
-                        this.symbolTable.addSymbol(new Symbol(labelAddress, token));
-                        labelAddress += 4;
+                        this.symbolTable.addSymbol(new Symbol(instructionCounter + 1, token));
                     }
-                    if ((i != 0 && words[i - 1].equals(":"))) {
-                        Token token = new Token(TokenType.VARIABLE, words[i]);
-                        this.lexo.addToken(token);
-                        this.symbolTable.addSymbol(new Symbol(labelAddress, token));
-                        labelAddress += 4;
+                    if ((i != words.length - 1) && BRANCHES.stream().anyMatch(mnemonic -> mnemonic.equalsIgnoreCase(words[finalI]))){
+                        this.instructionCounter++;
+                        this.lexo.addToken(new Token(TokenType.MNEMONIC, words[i]));
+                        this.lexo.addToken(new Token(TokenType.LABEL, words[i+1]));
                     }
 
                 }
@@ -104,11 +114,9 @@ public class FirstPass {
 
         Node currentLabel = null;
 
-
         for (List<Token> line : lines) {
             if (isLabel(line)) {
-                Token labelToken = findLabelToken(line);
-                currentLabel = new LabelNode(labelToken);
+                currentLabel = new LabelNode(new Token(TokenType.LABEL, line.get(0).getLexeme()));
                 root.addChild(currentLabel);
             } else {
                 Node instruction = new InstructionNode(line.get(0));
@@ -135,11 +143,7 @@ public class FirstPass {
 
 
     public boolean isLabel(List<Token> line) {
-        if (line.isEmpty()) return false;
-        for (Token token : line) {
-            if (token.getType().equals(TokenType.LABEL)) return true;
-        }
-        return false;
+        return line.get(0).getType().equals(TokenType.LABEL);
     }
 
     public Token findLabel(List<Token> line) {

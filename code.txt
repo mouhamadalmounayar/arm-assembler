@@ -1,5 +1,21 @@
-start :
-SUBS R5 R7 R0
-ADDS R1 R3 R1
-end :
-LSLS R1 R3
+movs r0, #0
+movs r1, #170
+movs r2, #255
+
+movs r3, #15
+ands r3, r1
+
+
+movs r4, #161
+eors r4, r1
+
+
+movs r5, #2
+movs r6, #15
+lsls r6, r5
+
+
+movs r7, #1
+lsrs r6, r7
+
+

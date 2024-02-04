@@ -19,7 +19,7 @@ public class SymbolTable {
 
     public Optional<Symbol> findSymbol(String symbolName) {
         for (Symbol symbol : this.symbolTable) {
-            if (symbol.getName().equals(symbolName)) {
+            if (symbol.getName().getLexeme().equals(symbolName)) {
                 return Optional.of(symbol);
             }
         }

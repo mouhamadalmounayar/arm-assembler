@@ -15,6 +15,6 @@ public class OperandNode extends Node {
     public boolean checkSyntax() {
         TokenType operand = this.node.getType();
         if (!this.children.isEmpty()) return false;
-        return (operand.equals(TokenType.REGISTER) || operand.equals(TokenType.IMMEDIATE))  || (operand.equals(TokenType.VARIABLE));
+        return (operand.equals(TokenType.REGISTER) || operand.equals(TokenType.IMMEDIATE))  || (operand.equals(TokenType.LABEL));
     }
 }
