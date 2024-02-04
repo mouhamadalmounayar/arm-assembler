@@ -5,10 +5,8 @@ import src.Parser.LabelNode;
 import src.Parser.Node;
 import src.Parser.OperandNode;
 
-import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +37,8 @@ public class FirstPass {
     }
 
     public List<String> getLinesFromFile() throws IOException {
-        return Files.readAllLines(Paths.get(this.filePath)).stream().filter(line -> !line.isEmpty()).collect(Collectors.toList());
+        System.out.println(Files.readAllLines(Paths.get(this.filePath)).stream().map(String::trim).filter(line -> !line.isEmpty()).collect(Collectors.toList()));
+        return Files.readAllLines(Paths.get(this.filePath)).stream().map(String::trim).filter(line -> !line.isEmpty()).collect(Collectors.toList());
     }
 
     public boolean execute() {
@@ -90,8 +89,8 @@ public class FirstPass {
         List<List<Token>> lines = new ArrayList<>();
         List<Token> line = new ArrayList<>();
         int index = 0;
-        while (index < tokens.size() && !tokens.get(index).getType().equals(TokenType.ENDOFFILE)) {
-            if (tokens.get(index).getType().equals(TokenType.ENDOFLINE)) {
+        while (index < tokens.size() && !tokens.get(index).type().equals(TokenType.ENDOFFILE)) {
+            if (tokens.get(index).type().equals(TokenType.ENDOFLINE)) {
                 lines.add(line);
                 line = new ArrayList<>();
             } else {
@@ -108,12 +107,11 @@ public class FirstPass {
 
     public Node buildTree(List<List<Token>> lines) {
         Node root = new LabelNode(new Token(TokenType.LABEL, "root"));
-
+        System.out.println(lines);
         Node currentLabel = null;
-
         for (List<Token> line : lines) {
             if (isLabel(line)) {
-                currentLabel = new LabelNode(new Token(TokenType.LABEL, line.get(0).getLexeme()));
+                currentLabel = new LabelNode(new Token(TokenType.LABEL, line.get(0).lexeme()));
                 root.addChild(currentLabel);
             } else {
                 Node instruction = new InstructionNode(line.get(0));
@@ -129,16 +127,9 @@ public class FirstPass {
         return root;
     }
 
-
     public boolean isLabel(List<Token> line) {
-        return line.get(0).getType().equals(TokenType.LABEL);
-    }
-
-    public Token findLabel(List<Token> line) {
-        for (Token token : line) {
-            if (token.getType().equals(TokenType.LABEL)) return token;
-        }
-        return line.get(0);
+        if (line.isEmpty()) return false;
+        return line.get(0).type().equals(TokenType.LABEL);
     }
 
     public LexicalAnalyzer getLexo() {

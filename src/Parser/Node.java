@@ -13,14 +13,14 @@ public abstract class Node {
     public abstract boolean checkSyntax();
 
     public boolean isImmediate() {
-        return (this.node.getType().equals(TokenType.IMMEDIATE));
+        return (this.node.type().equals(TokenType.IMMEDIATE));
     }
 
     public boolean isRegister() {
-        return (this.node.getType().equals(TokenType.REGISTER));
+        return (this.node.type().equals(TokenType.REGISTER));
     }
     public boolean isStackPointer() {
-        return (this.node.getType().equals(TokenType.REGISTER) && this.node.getLexeme().equalsIgnoreCase("sp"));
+        return (this.node.type().equals(TokenType.REGISTER) && this.node.lexeme().equalsIgnoreCase("sp"));
     }
 
     public Token getNode() {

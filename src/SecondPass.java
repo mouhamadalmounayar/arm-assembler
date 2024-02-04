@@ -11,7 +11,7 @@ public class SecondPass {
     private final List<String> BRANCHES = Arrays.asList("BEQ", "BNE", "BCS", "BHS", "BCC", "BLO", "BMI", "BPL", "BVS", "BVC", "BHI", "BLS", "BGE", "BLT", "BGT", "BLE", "BAL");
 
     List<StringBuilder> instructions = new ArrayList<>();
-    private int instructionCounter = 0;
+    private int instructionCounter = -1;
 
 
     public SecondPass(FirstPass firstPass) {
@@ -34,50 +34,46 @@ public class SecondPass {
         StringBuilder currentInstruction = new StringBuilder();
         for (List<Token> line : lines) {
             // duplicates
-            if (line.get(0).getType().equals(TokenType.LABEL)) {
+            if (line.get(0).type().equals(TokenType.LABEL)) {
                 continue;
             }
-            if (line.get(0).getLexeme().equalsIgnoreCase("ADDS") && line.size() == 4 && line.get(line.size() - 1).getType().equals(TokenType.REGISTER)) {
+            if (line.get(0).lexeme().equalsIgnoreCase("ADDS") && line.size() == 4 && line.get(line.size() - 1).type().equals(TokenType.REGISTER)) {
                 appendInstruction(currentInstruction, "ADDS_REGISTERS", line, 3);
                 instructionCounter++;
-
-            } else if (line.get(0).getLexeme().equalsIgnoreCase("ADDS") && line.size() - 1 == 3 && line.get(line.size() - 1).getType().equals(TokenType.IMMEDIATE)) {
+            } else if (line.get(0).lexeme().equalsIgnoreCase("ADDS") && line.size() - 1 == 3 && line.get(line.size() - 1).type().equals(TokenType.IMMEDIATE)) {
                 appendInstruction(currentInstruction, "ADDS_IMMEDIATES", line, 3);
                 instructionCounter++;
-            } else if (line.get(0).getLexeme().equalsIgnoreCase("SUBS") && line.size() == 4 && line.get(line.size() - 1).getType().equals(TokenType.REGISTER)) {
+            } else if (line.get(0).lexeme().equalsIgnoreCase("SUBS") && line.size() == 4 && line.get(line.size() - 1).type().equals(TokenType.REGISTER)) {
                 appendInstruction(currentInstruction, "SUBS_REGISTERS", line, 3);
                 instructionCounter++;
-            } else if (line.get(0).getLexeme().equalsIgnoreCase("SUBS") && line.size() - 1 == 3 && line.get(line.size() - 1).getType().equals(TokenType.IMMEDIATE)) {
+            } else if (line.get(0).lexeme().equalsIgnoreCase("SUBS") && line.size() - 1 == 3 && line.get(line.size() - 1).type().equals(TokenType.IMMEDIATE)) {
                 appendInstruction(currentInstruction, "SUBS_IMMEDIATES", line, 3);
                 instructionCounter++;
-            } else if (line.get(0).getLexeme().equalsIgnoreCase("CMP") && line.get(line.size() - 1).getType().equals(TokenType.IMMEDIATE)) {
+            } else if (line.get(0).lexeme().equalsIgnoreCase("CMP") && line.get(line.size() - 1).type().equals(TokenType.IMMEDIATE)) {
                 appendInstruction(currentInstruction, "CMP_IMMEDIATES", line, 8);
                 instructionCounter++;
-            } else if (line.get(0).getLexeme().equalsIgnoreCase("LSLS") && line.size() == 4) {
+            } else if (line.get(0).lexeme().equalsIgnoreCase("LSLS") && line.size() == 4) {
                 appendInstruction(currentInstruction, "LSLS_3", line, 5);
                 instructionCounter++;
-            } else if (line.get(0).getLexeme().equalsIgnoreCase("LSRS") && line.size() == 4) {
+            } else if (line.get(0).lexeme().equalsIgnoreCase("LSRS") && line.size() == 4) {
                 appendInstruction(currentInstruction, "LSRS_3", line, 5);
                 instructionCounter++;
-            } else if (line.get(0).getLexeme().equalsIgnoreCase("ASRS") && line.size() == 4) {
+            } else if (line.get(0).lexeme().equalsIgnoreCase("ASRS") && line.size() == 4) {
                 instructionCounter++;
                 appendInstruction(currentInstruction, "ASRS_3", line, 5);
                 // Others
-            } else if (EIGHT_BITS_IMMEDIATES_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(line.get(0).getLexeme()))) {
+            } else if (EIGHT_BITS_IMMEDIATES_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(line.get(0).lexeme())) || BRANCHES.stream().anyMatch(word -> word.equalsIgnoreCase(line.get(0).lexeme()))) {
                 instructionCounter++;
-                appendInstruction(currentInstruction, line.get(0).getLexeme(), line, 8);
-            } else if (SEVEN_BITS_IMMEDIATES_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(line.get(0).getLexeme()))) {
+                appendInstruction(currentInstruction, line.get(0).lexeme(), line, 8);
+            } else if (SEVEN_BITS_IMMEDIATES_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(line.get(0).lexeme()))) {
                 instructionCounter++;
-                appendInstruction(currentInstruction, line.get(0).getLexeme(), line, 7);
-            } else if (BRANCHES.stream().anyMatch(word -> word.equalsIgnoreCase(line.get(0).getLexeme()))) {
+                appendInstruction(currentInstruction, line.get(0).lexeme(), line, 7);
+            } else if (line.get(0).lexeme().equalsIgnoreCase("B")) {
                 instructionCounter++;
-                appendInstruction(currentInstruction, line.get(0).getLexeme(), line, 8);
-            } else if (line.get(0).getLexeme().equalsIgnoreCase("B")) {
-                instructionCounter++;
-                appendInstruction(currentInstruction, line.get(0).getLexeme(), line, 11);
+                appendInstruction(currentInstruction, line.get(0).lexeme(), line, 11);
             } else {
                 instructionCounter++;
-                appendInstruction(currentInstruction, line.get(0).getLexeme(), line, 0);
+                appendInstruction(currentInstruction, line.get(0).lexeme(), line, 0);
             }
             this.instructions.add(currentInstruction);
             currentInstruction = new StringBuilder();
@@ -91,43 +87,43 @@ public class SecondPass {
 
     public void appendInstruction(StringBuilder instruction, String mnemonic, List<Token> line, int bitsNumber) {
         instruction.append(this.mapping.findMnemonic(mnemonic));
-        if (mnemonic.equalsIgnoreCase("RSBS") || mnemonic.equalsIgnoreCase("MULS")){
-            for (int i = line.size() - 2 ; i>=1 ; i--){
-                instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
+        if (mnemonic.equalsIgnoreCase("RSBS") || mnemonic.equalsIgnoreCase("MULS")) {
+            for (int i = line.size() - 2; i >= 1; i--) {
+                instruction.append(this.mapping.findMnemonic(line.get(i).lexeme()));
             }
-        }
-        else if (mnemonic.startsWith("B") || mnemonic.startsWith("b")){
-            Optional<Symbol> symbol = this.firstPass.getSymbolTable().findSymbol(line.get(1).getLexeme());
-            if (symbol.isPresent()){
+        } else if (mnemonic.startsWith("B") || mnemonic.startsWith("b")) {
+            Optional<Symbol> symbol = this.firstPass.getSymbolTable().findSymbol(line.get(1).lexeme());
+            if (symbol.isPresent()) {
                 int offset = symbol.get().getAddress() - instructionCounter - 3;
                 offset &= (1 << bitsNumber) + offset;
                 String binary = Integer.toBinaryString(offset);
                 String formattedBinary = String.format("%" + bitsNumber + "s", binary).replace(' ', '0');
                 instruction.append(formattedBinary);
+            } else {
+                System.out.println("Unrecognized labels!");
             }
-        }
-        else if ( line.size()>2 && line.get(2).getType().equals(TokenType.REGISTER)) {
-            for (int i = line.size() - 1; i>=1 ; i--){
-                if (line.get(i).getType().equals(TokenType.IMMEDIATE) && !mnemonic.equalsIgnoreCase("RSBS")) {
-                    appendRestOfInstruction(line.get(i) , bitsNumber , instruction);
+        } else if (line.size() > 2 && line.get(2).type().equals(TokenType.REGISTER)) {
+            for (int i = line.size() - 1; i >= 1; i--) {
+                if (line.get(i).type().equals(TokenType.IMMEDIATE) && !mnemonic.equalsIgnoreCase("RSBS")) {
+                    appendRestOfInstruction(line.get(i), bitsNumber, instruction);
                 } else {
-                    instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
+                    instruction.append(this.mapping.findMnemonic(line.get(i).lexeme()));
                 }
             }
         } else {
             for (int i = 1; i < line.size(); i++) {
-                if (line.get(i).getType().equals(TokenType.IMMEDIATE)) {
-                    appendRestOfInstruction(line.get(i) , bitsNumber , instruction);
+                if (line.get(i).type().equals(TokenType.IMMEDIATE)) {
+                    appendRestOfInstruction(line.get(i), bitsNumber, instruction);
                 } else {
-                    instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
+                    instruction.append(this.mapping.findMnemonic(line.get(i).lexeme()));
                 }
             }
         }
 
     }
 
-    private void appendRestOfInstruction(Token token, int bitsNumber , StringBuilder instruction) {
-        String binary = Integer.toBinaryString(Integer.parseInt(token.getLexeme().substring(1)));
+    private void appendRestOfInstruction(Token token, int bitsNumber, StringBuilder instruction) {
+        String binary = Integer.toBinaryString(Integer.parseInt(token.lexeme().substring(1)));
         String formattedBinary = String.format("%" + bitsNumber + "s", binary).replace(' ', '0');
         instruction.append(formattedBinary);
     }

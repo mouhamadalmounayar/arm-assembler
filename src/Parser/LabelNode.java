@@ -19,6 +19,6 @@ public class LabelNode extends Node {
 
     @Override
     public boolean checkSyntax() {
-        return this.checkChildrenSyntax() && this.getNode().getType().equals(TokenType.LABEL);
+        return this.checkChildrenSyntax() && this.getNode().type().equals(TokenType.LABEL);
     }
 }

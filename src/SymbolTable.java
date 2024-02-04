@@ -1,13 +1,11 @@
 package src;
 
-import src.Symbol;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class SymbolTable {
-    private List<Symbol> symbolTable;
+    private final List<Symbol> symbolTable;
 
     public SymbolTable() {
         this.symbolTable = new ArrayList<>();
@@ -19,7 +17,7 @@ public class SymbolTable {
 
     public Optional<Symbol> findSymbol(String symbolName) {
         for (Symbol symbol : this.symbolTable) {
-            if (symbol.getName().getLexeme().equalsIgnoreCase(symbolName)) {
+            if (symbol.getName().lexeme().equalsIgnoreCase(symbolName)) {
                 return Optional.of(symbol);
             }
         }

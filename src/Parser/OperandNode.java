@@ -13,7 +13,7 @@ public class OperandNode extends Node {
 
     @Override
     public boolean checkSyntax() {
-        TokenType operand = this.node.getType();
+        TokenType operand = this.node.type();
         if (!this.children.isEmpty()) return false;
         return (operand.equals(TokenType.REGISTER) || operand.equals(TokenType.IMMEDIATE))  || (operand.equals(TokenType.LABEL));
     }
