@@ -99,7 +99,19 @@ public class SecondPass {
                 Instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
             }
         }
-        else if (line.get(2).getType().equals(TokenType.REGISTER)) {
+        else if (mnemonic.startsWith("B") || mnemonic.startsWith("b")){
+            Optional<Symbol> symbol = this.firstPass.getSymbolTable().findSymbol(line.get(1).getLexeme());
+            System.out.println(symbol);
+            if (symbol.isPresent()){
+                int offset = symbol.get().getAddress() - instructionCounter - 3;
+                System.out.println(offset);
+                offset &= (1 << bitsNumber) + offset;
+                String binary = Integer.toBinaryString(offset);
+                String formattedBinary = String.format("%" + bitsNumber + "s", binary).replace(' ', '0');
+                Instruction.append(formattedBinary);
+            }
+        }
+        else if ( line.size()>2 && line.get(2).getType().equals(TokenType.REGISTER)) {
             for (int i = line.size() - 1; i>=1 ; i--){
                 if (line.get(i).getType().equals(TokenType.IMMEDIATE) && !mnemonic.equalsIgnoreCase("RSBS")) {
                     String binary = Integer.toBinaryString(Integer.parseInt(line.get(i).getLexeme().substring(1)));

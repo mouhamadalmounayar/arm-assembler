@@ -1,3 +1,4 @@
+loop :
 movs r0, #0
 movs r1, #1
 movs r2, #170
@@ -12,6 +13,7 @@ sbcs r5, r1
 movs r6, #170
 rors r6, r1
 tst r2, r6
+BMI loop
 
 
 

@@ -19,6 +19,7 @@ public class SymbolTable {
 
     public Optional<Symbol> findSymbol(String symbolName) {
         for (Symbol symbol : this.symbolTable) {
+            System.out.println("comparing " + symbol.getName().getLexeme() + " with " + symbolName);
             if (symbol.getName().getLexeme().equalsIgnoreCase(symbolName)) {
                 return Optional.of(symbol);
             }
