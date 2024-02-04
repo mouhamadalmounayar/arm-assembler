@@ -1,8 +1,8 @@
 package src;
 
 public class BinaryCodeSymbol {
-    private String mnemonic;
-    private String binary;
+    private final String mnemonic;
+    private final String binary;
 
     public BinaryCodeSymbol(String mnemonic, String binary) {
         this.mnemonic = mnemonic;

@@ -2,9 +2,10 @@ package src;
 
 import java.util.ArrayList;
 import java.util.List;
+import src.Token; 
 
 public class LexicalAnalyzer {
-    private List<Token> tokens;
+    private final List<Token> tokens;
 
     public LexicalAnalyzer() {
         this.tokens = new ArrayList<>();

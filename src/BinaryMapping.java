@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BinaryMapping {
-    private List<BinaryCodeSymbol> map = new ArrayList<>();
+    private final List<BinaryCodeSymbol> map = new ArrayList<>();
 
     public BinaryMapping() {
         // duplicates
