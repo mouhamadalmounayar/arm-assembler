@@ -94,9 +94,14 @@ public class SecondPass {
     public void appendInstruction(StringBuilder Instruction, String mnemonic, List<Token> line, int bitsNumber) {
         Instruction.append(this.mapping.findMnemonic(mnemonic));
         System.out.println(Instruction);
-        if (line.get(2).getType().equals(TokenType.REGISTER)) {
+        if (mnemonic.equalsIgnoreCase("RSBS") || mnemonic.equalsIgnoreCase("MULS")){
+            for (int i = line.size() - 2 ; i>=1 ; i--){
+                Instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
+            }
+        }
+        else if (line.get(2).getType().equals(TokenType.REGISTER)) {
             for (int i = line.size() - 1; i>=1 ; i--){
-                if (line.get(i).getType().equals(TokenType.IMMEDIATE)) {
+                if (line.get(i).getType().equals(TokenType.IMMEDIATE) && !mnemonic.equalsIgnoreCase("RSBS")) {
                     String binary = Integer.toBinaryString(Integer.parseInt(line.get(i).getLexeme().substring(1)));
                     String formattedBinary = String.format("%" + bitsNumber + "s", binary).replace(' ', '0');
                     Instruction.append(formattedBinary);
