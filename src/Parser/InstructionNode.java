@@ -30,10 +30,10 @@ public class InstructionNode extends Node {
 
     @Override
     public boolean checkSyntax() {
-        if (!this.node.getType().equals(TokenType.MNEMONIC)) {
+        if (!this.node.type().equals(TokenType.MNEMONIC)) {
             return false;
         }
-        String mnemonic = this.node.getLexeme();
+        String mnemonic = this.node.lexeme();
         // register operations
         if (REGISTER_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))) {
             if (this.children.size() == 3) {
@@ -83,7 +83,7 @@ public class InstructionNode extends Node {
         }
         // branch operations
         if (BRANCH_OPERATIONS.stream().anyMatch(word -> word.equalsIgnoreCase(mnemonic))){
-            return this.checkChildrenSyntax() && this.children.get(0).getNode().getType().equals(TokenType.LABEL) ;
+            return this.checkChildrenSyntax() && this.children.get(0).getNode().type().equals(TokenType.LABEL) ;
         }
 
         return false;

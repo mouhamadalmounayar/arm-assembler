@@ -75,6 +75,7 @@ public class BinaryMapping {
         map.add(new BinaryCodeSymbol("BLE", "11011101"));
         map.add(new BinaryCodeSymbol("BAL", "11011110"));
         map.add(new BinaryCodeSymbol("B", "11100"));
+        map.add(new BinaryCodeSymbol("sp", ""));
     }
 
     public List<BinaryCodeSymbol> getMap() {
