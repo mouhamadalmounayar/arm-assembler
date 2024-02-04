@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class FirstPass {
@@ -33,7 +34,7 @@ public class FirstPass {
         this.instructionCounter = -1;
     }
 
-    public SymbolTable getSymbolTable(){
+    public SymbolTable getSymbolTable() {
         return this.symbolTable;
     }
 
@@ -47,7 +48,6 @@ public class FirstPass {
             List<String> lines = this.getLinesFromFile();
             for (String line : lines) {
                 String[] words = line.split("[\\[\\],\\s]+");
-                System.out.println(Arrays.toString(words));
                 for (int i = 0; i < words.length; i++) {
                     int finalI = i;
                     if (MNEMONICS.stream().anyMatch(mnemonic -> mnemonic.equalsIgnoreCase(words[finalI]))) {
@@ -70,22 +70,19 @@ public class FirstPass {
                         this.lexo.addToken(token);
                         this.symbolTable.addSymbol(new Symbol(instructionCounter + 1, token));
                     }
-                    if ((i != words.length - 1) && BRANCHES.stream().anyMatch(mnemonic -> mnemonic.equalsIgnoreCase(words[finalI]))){
+                    if ((i != words.length - 1) && BRANCHES.stream().anyMatch(mnemonic -> mnemonic.equalsIgnoreCase(words[finalI]))) {
                         this.instructionCounter++;
                         this.lexo.addToken(new Token(TokenType.MNEMONIC, words[i]));
-                        this.lexo.addToken(new Token(TokenType.LABEL, words[i+1]));
+                        this.lexo.addToken(new Token(TokenType.LABEL, words[i + 1]));
                     }
 
                 }
             }
             this.lexo.addToken(new Token(TokenType.ENDOFFILE, ""));
-            System.out.println(this.lexo.getTokens());
-            System.out.println(symbolTable.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
         Node tree = this.buildTree(this.organizeTokens(this.lexo.getTokens()));
-        System.out.println(tree);
         return tree.checkSyntax();
     }
 
@@ -125,20 +122,11 @@ public class FirstPass {
                     instruction.addChild(new OperandNode(line.get(i)));
                 }
 
-                if (currentLabel != null) {
-                    currentLabel.addChild(instruction);
-                } else {
-                    root.addChild(instruction);
-                }
+                Objects.requireNonNullElse(currentLabel, root).addChild(instruction);
             }
         }
 
         return root;
-    }
-
-    private Token findLabelToken(List<Token> line) {
-        // Assuming the first token is always the label token
-        return line.get(0);
     }
 
 
@@ -151,10 +139,6 @@ public class FirstPass {
             if (token.getType().equals(TokenType.LABEL)) return token;
         }
         return line.get(0);
-    }
-
-    public boolean isInstruction(List<Token> line) {
-        return !line.isEmpty() && line.get(0).getType().equals(TokenType.MNEMONIC);
     }
 
     public LexicalAnalyzer getLexo() {

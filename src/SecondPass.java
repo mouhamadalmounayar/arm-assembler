@@ -1,6 +1,6 @@
 package src;
 
-import javax.swing.text.html.Option;
+
 import java.util.*;
 
 public class SecondPass {
@@ -21,7 +21,6 @@ public class SecondPass {
 
     public List<StringBuilder> execute() {
         List<StringBuilder> instructions = this.getInstructionsInBinary();
-        System.out.println(instructions);
         List<StringBuilder> result = new ArrayList<>();
         for (StringBuilder instruction : instructions) {
             StringBuilder hexInstruction = convertToHexa(instruction);
@@ -34,7 +33,6 @@ public class SecondPass {
         List<List<Token>> lines = this.firstPass.organizeTokens(this.firstPass.getLexo().getTokens());
         StringBuilder currentInstruction = new StringBuilder();
         for (List<Token> line : lines) {
-            System.out.println(line.get(0));
             // duplicates
             if (line.get(0).getType().equals(TokenType.LABEL)) {
                 continue;
@@ -91,49 +89,47 @@ public class SecondPass {
         return this.instructions;
     }
 
-    public void appendInstruction(StringBuilder Instruction, String mnemonic, List<Token> line, int bitsNumber) {
-        Instruction.append(this.mapping.findMnemonic(mnemonic));
-        System.out.println(Instruction);
+    public void appendInstruction(StringBuilder instruction, String mnemonic, List<Token> line, int bitsNumber) {
+        instruction.append(this.mapping.findMnemonic(mnemonic));
         if (mnemonic.equalsIgnoreCase("RSBS") || mnemonic.equalsIgnoreCase("MULS")){
             for (int i = line.size() - 2 ; i>=1 ; i--){
-                Instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
+                instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
             }
         }
         else if (mnemonic.startsWith("B") || mnemonic.startsWith("b")){
             Optional<Symbol> symbol = this.firstPass.getSymbolTable().findSymbol(line.get(1).getLexeme());
-            System.out.println(symbol);
             if (symbol.isPresent()){
                 int offset = symbol.get().getAddress() - instructionCounter - 3;
-                System.out.println(offset);
                 offset &= (1 << bitsNumber) + offset;
                 String binary = Integer.toBinaryString(offset);
                 String formattedBinary = String.format("%" + bitsNumber + "s", binary).replace(' ', '0');
-                Instruction.append(formattedBinary);
+                instruction.append(formattedBinary);
             }
         }
         else if ( line.size()>2 && line.get(2).getType().equals(TokenType.REGISTER)) {
             for (int i = line.size() - 1; i>=1 ; i--){
                 if (line.get(i).getType().equals(TokenType.IMMEDIATE) && !mnemonic.equalsIgnoreCase("RSBS")) {
-                    String binary = Integer.toBinaryString(Integer.parseInt(line.get(i).getLexeme().substring(1)));
-                    String formattedBinary = String.format("%" + bitsNumber + "s", binary).replace(' ', '0');
-                    Instruction.append(formattedBinary);
+                    appendRestOfInstruction(line.get(i) , bitsNumber , instruction);
                 } else {
-                    Instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
+                    instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
                 }
             }
         } else {
             for (int i = 1; i < line.size(); i++) {
                 if (line.get(i).getType().equals(TokenType.IMMEDIATE)) {
-                    String binary = Integer.toBinaryString(Integer.parseInt(line.get(i).getLexeme().substring(1)));
-                    System.out.println(binary);
-                    String formattedBinary = String.format("%" + bitsNumber + "s", binary).replace(' ', '0');
-                    Instruction.append(formattedBinary);
+                    appendRestOfInstruction(line.get(i) , bitsNumber , instruction);
                 } else {
-                    Instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
+                    instruction.append(this.mapping.findMnemonic(line.get(i).getLexeme()));
                 }
             }
         }
 
+    }
+
+    private void appendRestOfInstruction(Token token, int bitsNumber , StringBuilder instruction) {
+        String binary = Integer.toBinaryString(Integer.parseInt(token.getLexeme().substring(1)));
+        String formattedBinary = String.format("%" + bitsNumber + "s", binary).replace(' ', '0');
+        instruction.append(formattedBinary);
     }
 
     public StringBuilder convertToHexa(StringBuilder binary) {
@@ -143,7 +139,6 @@ public class SecondPass {
             int decimal = Integer.parseInt(fourBits, 2);
             String hexDigit = Integer.toHexString(decimal).toUpperCase();
             result.append(hexDigit);
-
         }
         return result;
     }
